@@ -476,6 +476,9 @@ h1, .serif { font-family: 'DM Serif Display', serif; font-weight: 400; }
       <button id="btn-ativar-notif" onclick="ativarNotifBtn()" style="width:100%;background:var(--accent);color:#1a1610;border:none;border-radius:10px;padding:13px;font-family:DM Sans,sans-serif;font-size:14px;font-weight:500;cursor:pointer;">
         🔔 Ativar avisos
       </button>
+      <button onclick="testarNotificacao()" style="width:100%;background:var(--surface2);color:var(--muted);border:1px solid var(--border2);border-radius:10px;padding:11px;font-family:DM Sans,sans-serif;font-size:13px;cursor:pointer;margin-top:8px;">
+        🧪 Enviar notificação de teste
+      </button>
       <p id="notif-result" style="font-size:12px;color:var(--muted);text-align:center;margin-top:10px;line-height:1.6"></p>
     </div>
   </div>
@@ -1214,7 +1217,6 @@ async function doInstall() {
 }
 
 // ── NOTIFICAÇÕES VIA SERVICE WORKER ──
-// O SW verifica a cada 60s se há agendamentos 1h antes — funciona em segundo plano
 
 async function pedirPermissaoNotificacao() {
   if (!('Notification' in window)) return false;
@@ -1224,29 +1226,73 @@ async function pedirPermissaoNotificacao() {
   return result === 'granted';
 }
 
-// Envia lista de agendamentos para o SW monitorar
+// Envia agendamentos para o SW e aguarda confirmação
 async function sincronizarAgendaSW() {
-  if (!('serviceWorker' in navigator)) return;
-  if (Notification.permission !== 'granted') return;
+  if (!('serviceWorker' in navigator)) return 0;
+  if (Notification.permission !== 'granted') return 0;
   const reg = await navigator.serviceWorker.ready;
-  if (reg && reg.active) {
+  if (!reg || !reg.active) return 0;
+
+  return new Promise(resolve => {
+    // Ouve a resposta do SW com quantos foram agendados
+    const handler = event => {
+      if (event.data?.tipo === 'AGENDADOS') {
+        navigator.serviceWorker.removeEventListener('message', handler);
+        resolve(event.data.total || 0);
+      }
+    };
+    navigator.serviceWorker.addEventListener('message', handler);
     reg.active.postMessage({ tipo: 'AGENDAMENTOS', agendas });
+    // Timeout de segurança caso o SW não responda
+    setTimeout(() => { navigator.serviceWorker.removeEventListener('message', handler); resolve(0); }, 3000);
+  });
+}
+
+// Chamada ao clicar no botão — pede permissão e sincroniza
+async function agendarNotificacoes() {
+  const total = await sincronizarAgendaSW();
+  const result = document.getElementById('notif-result');
+  if (result) {
+    const futuros = agendas.filter(ag => {
+      if (!ag.data || !ag.hora || ag.status === 'cancelado') return false;
+      const dt = new Date(ag.data + 'T' + ag.hora + ':00').getTime() - 3600000;
+      return dt > Date.now();
+    }).length;
+    if (futuros > 0) {
+      result.innerHTML = `✅ ${futuros} aviso${futuros>1?'s':''} agendado${futuros>1?'s':''} — você será avisada 1h antes de cada cliente.`;
+    } else {
+      result.textContent = 'Avisos ativados! Adicione agendamentos futuros para receber lembretes.';
+    }
   }
 }
 
 async function iniciarNotificacoes() {
   const ok = await pedirPermissaoNotificacao();
-  if (ok) sincronizarAgendaSW();
+  if (ok) agendarNotificacoes();
 }
 
 function reagendarNotificacoes() {
-  sincronizarAgendaSW();
+  if (Notification.permission === 'granted') sincronizarAgendaSW();
 }
 
-// Resincrona sempre que o SW estiver pronto
+// Resincrona quando o SW estiver pronto (app já com permissão)
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.ready.then(reg => {
+  navigator.serviceWorker.ready.then(() => {
     if (Notification.permission === 'granted') sincronizarAgendaSW();
+  });
+}
+
+// Teste rápido: envia uma notificação de teste imediata
+async function testarNotificacao() {
+  if (Notification.permission !== 'granted') {
+    alert('Ative as notificações primeiro.');
+    return;
+  }
+  const reg = await navigator.serviceWorker.ready;
+  reg.showNotification('✂️ Teste — Espaço Gabi Borges', {
+    body: 'Notificações funcionando! Você receberá avisos 1h antes dos agendamentos.',
+    icon: './icon-192.png',
+    tag: 'teste'
   });
 }
 
