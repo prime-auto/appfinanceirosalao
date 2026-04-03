@@ -1213,7 +1213,9 @@ async function doInstall() {
   renderApp();
 }
 
-// ── NOTIFICAÇÕES ──
+// ── NOTIFICAÇÕES VIA SERVICE WORKER ──
+// O SW verifica a cada 60s se há agendamentos 1h antes — funciona em segundo plano
+
 async function pedirPermissaoNotificacao() {
   if (!('Notification' in window)) return false;
   if (Notification.permission === 'granted') return true;
@@ -1222,56 +1224,30 @@ async function pedirPermissaoNotificacao() {
   return result === 'granted';
 }
 
-function agendarNotificacoes() {
-  if (!('Notification' in window)) return;
+// Envia lista de agendamentos para o SW monitorar
+async function sincronizarAgendaSW() {
+  if (!('serviceWorker' in navigator)) return;
   if (Notification.permission !== 'granted') return;
-
-  // Cancela timers anteriores
-  if (window._notifTimers) window._notifTimers.forEach(t => clearTimeout(t));
-  window._notifTimers = [];
-
-  const agora = new Date();
-  const hoje = agora.toISOString().split('T')[0];
-  const amanha = new Date(agora); amanha.setDate(amanha.getDate()+1);
-  const amanhISO = amanha.toISOString().split('T')[0];
-
-  // Verifica agendamentos de hoje e amanhã
-  const proximos = agendas.filter(a =>
-    (a.data === hoje || a.data === amanhISO) && a.status !== 'cancelado'
-  );
-
-  proximos.forEach(a => {
-    const [ano, mes, dia] = a.data.split('-').map(Number);
-    const [hora, min] = a.hora.split(':').map(Number);
-    const dataAgend = new Date(ano, mes-1, dia, hora, min, 0);
-    const umHoraAntes = new Date(dataAgend.getTime() - 60 * 60 * 1000);
-    const msAte = umHoraAntes.getTime() - agora.getTime();
-
-    if (msAte > 0 && msAte < 24 * 60 * 60 * 1000) { // só se for nas próximas 24h
-      const timer = setTimeout(() => {
-        new Notification('⏰ Agendamento em 1 hora', {
-          body: `${a.cliente} — ${a.servico} às ${a.hora}`,
-          icon: './icon-192.png',
-          badge: './icon-192.png',
-          tag: 'agendamento-' + a.id,
-          renotify: false,
-          requireInteraction: false,
-        });
-      }, msAte);
-      window._notifTimers.push(timer);
-    }
-  });
+  const reg = await navigator.serviceWorker.ready;
+  if (reg && reg.active) {
+    reg.active.postMessage({ tipo: 'AGENDAMENTOS', agendas });
+  }
 }
 
-// Pede permissão na primeira abertura e agenda ao carregar
 async function iniciarNotificacoes() {
   const ok = await pedirPermissaoNotificacao();
-  if (ok) agendarNotificacoes();
+  if (ok) sincronizarAgendaSW();
 }
 
-// Reagen toda vez que agendas mudam
 function reagendarNotificacoes() {
-  if (Notification.permission === 'granted') agendarNotificacoes();
+  sincronizarAgendaSW();
+}
+
+// Resincrona sempre que o SW estiver pronto
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.ready.then(reg => {
+    if (Notification.permission === 'granted') sincronizarAgendaSW();
+  });
 }
 
 </script>
