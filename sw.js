@@ -1,92 +1,51 @@
-const CACHE = 'salao-v3';
-const ASSETS = [
-  './',
-  './index.html',
-  './manifest.json',
-  './icon-192.png',
-  './icon-512.png'
-];
+// sw.js
+const CACHE = 'gabi-v1';
 
-self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(ASSETS)).catch(() => {})
-  );
-  self.skipWaiting();
-});
+self.addEventListener('install', e => self.skipWaiting());
+self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
 
-self.addEventListener('activate', e => {
-  e.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
-    )
-  );
-  self.clients.claim();
-});
+// Guarda os timers ativos
+const timers = {};
 
-self.addEventListener('fetch', e => {
-  if (e.request.method !== 'GET') return;
-  if (e.request.url.includes('api.anthropic.com')) return;
-  if (e.request.url.includes('fonts.googleapis.com')) return;
-  if (e.request.url.includes('fonts.gstatic.com')) return;
+self.addEventListener('message', event => {
+  if (event.data?.tipo !== 'AGENDAMENTOS') return;
 
-  e.respondWith(
-    fetch(e.request)
-      .then(res => {
-        if (res && res.status === 200) {
-          const clone = res.clone();
-          caches.open(CACHE).then(c => c.put(e.request, clone));
-        }
-        return res;
-      })
-      .catch(() => caches.match(e.request).then(r => r || caches.match('./index.html')))
-  );
-});
+  const agendas = event.data.agendas || [];
 
-// ── NOTIFICAÇÕES ──
-// Recebe lista de agendamentos do app via postMessage
-let agendamentosParaNotificar = [];
+  // Limpa timers antigos
+  Object.values(timers).forEach(id => clearTimeout(id));
+  Object.keys(timers).forEach(k => delete timers[k]);
 
-self.addEventListener('message', e => {
-  if (e.data && e.data.tipo === 'AGENDAMENTOS') {
-    agendamentosParaNotificar = e.data.agendas || [];
-  }
-});
+  const agora = Date.now();
 
-// Verifica a cada 60 segundos se algum agendamento está a 1h de distância
-setInterval(() => {
-  const agora = new Date();
-  const hoje  = agora.toISOString().split('T')[0];
-  const amanha = new Date(agora); amanha.setDate(amanha.getDate() + 1);
-  const amanhaISO = amanha.toISOString().split('T')[0];
+  agendas.forEach(ag => {
+    if (!ag.data || !ag.hora || ag.status === 'cancelado') return;
 
-  agendamentosParaNotificar.forEach(a => {
-    if (a.status === 'cancelado') return;
-    if (a.data !== hoje && a.data !== amanhaISO) return;
+    // Monta o timestamp do agendamento
+    const dt = new Date(`${ag.data}T${ag.hora}:00`);
+    const msParaNotif = dt.getTime() - 60 * 60 * 1000 - agora; // 1h antes
 
-    const [ano, mes, dia] = a.data.split('-').map(Number);
-    const [hr, mn] = a.hora.split(':').map(Number);
-    const horario = new Date(ano, mes - 1, dia, hr, mn, 0);
-    const umHoraAntes = new Date(horario.getTime() - 60 * 60 * 1000);
+    if (msParaNotif < 0) return; // já passou
 
-    // Dispara se estiver dentro da janela de 60s ao redor do momento exato
-    const diffMs = umHoraAntes.getTime() - agora.getTime();
-    if (diffMs >= 0 && diffMs < 60000) {
-      const jaNotificado = a._notificado || false;
-      if (!jaNotificado) {
-        a._notificado = true; // evita duplicar dentro do mesmo minuto
-        self.registration.showNotification('⏰ Agendamento em 1 hora', {
-          body: `${a.cliente} — ${a.servico} às ${a.hora}`,
-          icon: './icon-192.png',
-          badge: './icon-192.png',
-          tag: 'ag-' + a.id,
-          renotify: false,
-          requireInteraction: true,
-          vibrate: [200, 100, 200],
-        });
-      }
-    }
-
-    // Reset flag no dia seguinte para permitir nova notificação se reagendado
-    if (diffMs < -120000) a._notificado = false;
+    timers[ag.id] = setTimeout(() => {
+      self.registration.showNotification('✂️ Espaço Gabi Borges', {
+        body: `${ag.cliente} chega em 1 hora — ${ag.servico} às ${ag.hora}`,
+        icon: '/icon-192.png',
+        badge: '/icon-192.png',
+        tag: `agenda-${ag.id}`,
+        renotify: true,
+        data: { agendaId: ag.id }
+      });
+    }, msParaNotif);
   });
-}, 60000); // a cada 1 minuto
+});
+
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window' }).then(clients => {
+      if (clients.length) return clients[0].focus();
+      return self.clients.openWindow('/');
+    })
+  );
+});
