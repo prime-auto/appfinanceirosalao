@@ -1299,3 +1299,204 @@ async function testarNotificacao() {
 </script>
 </body>
 </html>
+
+// ── REGISTRAR SERVICE WORKER COM PERIODIC SYNC ──
+async function registrarServiceWorker() {
+  if (!('serviceWorker' in navigator)) {
+    console.log('❌ Service Worker não suportado');
+    return;
+  }
+
+  try {
+    const reg = await navigator.serviceWorker.register('./sw.js', { scope: './' });
+    console.log('✅ Service Worker registrado:', reg);
+
+    // Registra Periodic Sync (a cada 15 minutos)
+    if ('periodicSync' in reg) {
+      try {
+        await reg.periodicSync.register('check-agendamentos', {
+          minInterval: 15 * 60 * 1000 // 15 minutos
+        });
+        console.log('✅ Periodic Sync registrado (15 minutos)');
+      } catch (err) {
+        console.warn('⚠️ Periodic Sync não disponível:', err.message);
+      }
+    }
+
+    // Registra Background Sync
+    if ('sync' in reg) {
+      try {
+        await reg.sync.register('sync-agendamentos');
+        console.log('✅ Background Sync registrado');
+      } catch (err) {
+        console.warn('⚠️ Background Sync não disponível:', err.message);
+      }
+    }
+
+  } catch (err) {
+    console.error('❌ Erro ao registrar Service Worker:', err);
+  }
+}
+
+// ── SINCRONIZAR AGENDAMENTOS COM O SERVICE WORKER ──
+async function sincronizarAgendamentosComSW() {
+  if (!('serviceWorker' in navigator)) return;
+
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    
+    console.log('[APP] Sincronizando agendamentos com SW...');
+    console.log('[APP] Total de agendamentos:', agendas.length);
+
+    // Envia os agendamentos para o Service Worker
+    reg.active.postMessage({
+      tipo: 'AGENDAMENTOS',
+      agendas: agendas
+    });
+
+    // Aguarda resposta do SW
+    const messageHandler = (event) => {
+      if (event.data?.tipo === 'AGENDADOS') {
+        console.log(`✅ ${event.data.total} agendamentos sincronizados`);
+        console.log(event.data.mensagem);
+        navigator.serviceWorker.controller.removeEventListener('message', messageHandler);
+      }
+    };
+
+    navigator.serviceWorker.controller?.addEventListener('message', messageHandler);
+
+  } catch (err) {
+    console.error('[APP] Erro ao sincronizar:', err);
+  }
+}
+
+// ── ATIVAR NOTIFICAÇÕES (VERSÃO MELHORADA) ──
+async function ativarNotifBtn() {
+  const btn = document.getElementById('btn-ativar-notif');
+  const result = document.getElementById('notif-result');
+
+  if (!('Notification' in window)) {
+    result.textContent = '❌ Seu navegador não suporta notificações.';
+    return;
+  }
+
+  if (Notification.permission === 'granted') {
+    // Já tem permissão
+    await registrarServiceWorker();
+    await sincronizarAgendamentosComSW();
+    btn.textContent = '✅ Avisos ativados';
+    btn.style.background = 'var(--green-dim)';
+    btn.style.color = 'var(--green)';
+    btn.style.border = '1px solid rgba(76,175,125,0.3)';
+    result.textContent = 'Você receberá um aviso 1 hora antes de cada agendamento.';
+    return;
+  }
+
+  // Solicita permissão
+  const perm = await Notification.requestPermission();
+  if (perm === 'granted') {
+    await registrarServiceWorker();
+    await sincronizarAgendamentosComSW();
+    btn.textContent = '✅ Avisos ativados!';
+    btn.style.background = 'var(--green-dim)';
+    btn.style.color = 'var(--green)';
+    btn.style.border = '1px solid rgba(76,175,125,0.3)';
+    result.textContent = 'Perfeito! Você receberá um aviso 1 hora antes de cada agendamento. O app pode estar fechado que as notificações chegarão.';
+  } else {
+    btn.style.opacity = '0.5';
+    result.innerHTML = '⚠️ Permissão negada. Vá em <strong style="color:var(--text)">Configurações do Chrome → Notificações</strong> e ative para este site.';
+  }
+}
+
+// ── SINCRONIZAR SEMPRE QUE SALVAR AGENDAMENTO ──
+// Substitua a função saveAgendamento() existente por esta:
+function saveAgendamento() {
+  const cliente = document.getElementById('ag-cliente').value.trim();
+  const servico = document.getElementById('ag-servico').value.trim();
+  const data    = document.getElementById('ag-data').value;
+  const hora    = document.getElementById('ag-hora').value;
+  const obs     = document.getElementById('ag-obs').value.trim();
+
+  if (!cliente || !servico || !data || !hora) {
+    alert('Preencha cliente, serviço, data e horário.');
+    return;
+  }
+
+  if (editingAgendaId) {
+    const idx = agendas.findIndex(x => x.id === editingAgendaId);
+    if (idx >= 0) {
+      agendas[idx] = { ...agendas[idx], cliente, servico, data, hora, obs };
+    }
+  } else {
+    agendas.push({ 
+      id: Date.now(), 
+      cliente, 
+      servico, 
+      data, 
+      hora, 
+      obs, 
+      status: 'pendente' 
+    });
+  }
+
+  saveAgendas();
+  
+  // ✅ SINCRONIZA COM O SERVICE WORKER IMEDIATAMENTE
+  sincronizarAgendamentosComSW();
+
+  closeAgendaModal();
+  selectedDate = data;
+  renderAgenda();
+}
+
+// ── SINCRONIZAR AO CARREGAR O APP ──
+// Adicione isto ao final do seu código de inicialização:
+document.addEventListener('DOMContentLoaded', async () => {
+  // ... seu código existente ...
+
+  // Registra o Service Worker e sincroniza
+  if ('serviceWorker' in navigator) {
+    await registrarServiceWorker();
+    // Sincroniza agendamentos salvos
+    await sincronizarAgendamentosComSW();
+  }
+
+  // Atualiza o botão de notificações
+  updateNotifBtn();
+});
+
+// ── SINCRONIZAR PERIODICAMENTE (A CADA 5 MINUTOS) ──
+// Adicione isto também ao seu código de inicialização:
+setInterval(async () => {
+  if (Notification.permission === 'granted') {
+    console.log('[APP] Sincronização periódica...');
+    await sincronizarAgendamentosComSW();
+  }
+}, 5 * 60 * 1000); // 5 minutos
+
+// ── ATUALIZAR BOTÃO DE NOTIFICAÇÕES ──
+function updateNotifBtn() {
+  const btn = document.getElementById('btn-ativar-notif');
+  const result = document.getElementById('notif-result');
+  
+  if (!btn) return;
+
+  if (!('Notification' in window)) {
+    btn.textContent = '❌ Notificações não suportadas';
+    btn.style.opacity = '0.4';
+    btn.style.pointerEvents = 'none';
+    return;
+  }
+
+  if (Notification.permission === 'granted') {
+    btn.textContent = '✅ Avisos ativados';
+    btn.style.background = 'var(--green-dim)';
+    btn.style.color = 'var(--green)';
+    btn.style.border = '1px solid rgba(76,175,125,0.3)';
+    result.textContent = 'Você receberá um aviso 1 hora antes de cada agendamento.';
+  } else if (Notification.permission === 'denied') {
+    btn.style.opacity = '0.45';
+    btn.style.pointerEvents = 'none';
+    result.innerHTML = '⚠️ Permissão bloqueada. Ative nas configurações do Chrome.';
+  }
+}
