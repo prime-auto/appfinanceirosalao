@@ -1124,8 +1124,13 @@ function saveAgendamento() {
     agendas.push({ id: Date.now(), cliente, servico, data, hora, obs, status:'pendente' });
   }
   saveAgendas();
+// Sincroniza IMEDIATAMENTE após salvar
+if (Notification.permission === 'granted') {
   reagendarNotificacoes();
-  closeAgendaModal();
+} else {
+  console.log('[APP] ℹ️ Notificações não ativadas');
+}
+closeAgendaModal();
   selectedDate = data;
   renderAgenda();
 }
@@ -1271,14 +1276,55 @@ async function iniciarNotificacoes() {
   if (ok) agendarNotificacoes();
 }
 
-function reagendarNotificacoes() {
-  if (Notification.permission === 'granted') sincronizarAgendaSW();
+async function reagendarNotificacoes() {
+  if (Notification.permission !== 'granted') return;
+  
+  // Força o SW a acordar
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    if (reg && reg.active) {
+      // Envia a mensagem de sincronização
+      reg.active.postMessage({ tipo: 'AGENDAMENTOS', agendas });
+      console.log('[APP] ✅ Agendamentos sincronizados com SW');
+      
+      // Tenta registrar Periodic Sync (15 minutos)
+      if ('periodicSync' in reg) {
+        try {
+          await reg.periodicSync.register('sync-agendas', {
+            minInterval: 15 * 60 * 1000 // 15 minutos
+          });
+          console.log('[APP] ✅ Periodic Sync registrado');
+        } catch (e) {
+          console.log('[APP] ⚠️ Periodic Sync não disponível:', e.message);
+        }
+      }
+    }
+  } catch (e) {
+    console.log('[APP] ❌ Erro ao sincronizar:', e.message);
+  }
+}
 }
 
 // Resincrona quando o SW estiver pronto (app já com permissão)
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.ready.then(() => {
-    if (Notification.permission === 'granted') sincronizarAgendaSW();
+  navigator.serviceWorker.ready.then(async (reg) => {
+    console.log('[APP] ✅ Service Worker pronto');
+    
+    // Sincroniza agendamentos existentes
+    if (Notification.permission === 'granted') {
+      reg.active.postMessage({ tipo: 'AGENDAMENTOS', agendas });
+      console.log('[APP] ✅ Agendamentos sincronizados ao iniciar');
+      
+      // Registra Periodic Sync
+      if ('periodicSync' in reg) {
+        try {
+          await reg.periodicSync.register('sync-agendas', {
+            minInterval: 15 * 60 * 1000
+          });
+          console.log('[APP] ✅ Periodic Sync registrado ao iniciar');
+        } catch (e) {}
+      }
+    }
   });
 }
 
@@ -1295,7 +1341,16 @@ async function testarNotificacao() {
     tag: 'teste'
   });
 }
-
+// Sincroniza a cada 5 minutos quando o app está aberto
+setInterval(async () => {
+  if (Notification.permission === 'granted' && navigator.serviceWorker.controller) {
+    navigator.serviceWorker.controller.postMessage({ 
+      tipo: 'AGENDAMENTOS', 
+      agendas 
+    });
+    console.log('[APP] 🔄 Sincronização periódica (5 min)');
+  }
+}, 5 * 60 * 1000);
 </script>
 </body>
 </html>
