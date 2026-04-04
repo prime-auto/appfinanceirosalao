@@ -1,1194 +1,950 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-<meta name="mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="apple-mobile-web-app-title" content="Gabi Borges"/>
-<meta name="theme-color" content="#0f0e0c"/>
-<title>Espaço Gabi Borges</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
-<link rel="manifest" href="./manifest.json"/>
-<link rel="apple-touch-icon" href="./icon-192.png"/>
-<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png"/>
-<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png"/>
-<style>
-:root {
-  --bg: #0f0e0c;
-  --surface: #181714;
-  --surface2: #211f1b;
-  --border: rgba(255,255,255,0.07);
-  --border2: rgba(255,255,255,0.13);
-  --text: #f0ece4;
-  --muted: #8a8278;
-  --accent: #c9a96e;
-  --accent2: #e8c98a;
-  --green: #4caf7d;
-  --green-dim: rgba(76,175,125,0.13);
-  --red: #e05a5a;
-  --red-dim: rgba(224,90,90,0.13);
-  --gold-dim: rgba(201,169,110,0.1);
-  --radius: 14px;
-  --radius-sm: 10px;
-  --nav-h: 64px;
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
-}
-* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-html, body { height: 100%; overscroll-behavior: none; }
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 300;
-  min-height: 100%;
-  padding-bottom: calc(var(--nav-h) + var(--safe-bottom));
-}
-h1, .serif { font-family: 'DM Serif Display', serif; font-weight: 400; }
-
-/* ── HEADER ── */
-.app-header {
-  position: sticky; top: 0; z-index: 50;
-  background: var(--bg);
-  border-bottom: 1px solid var(--border);
-  padding: 14px 18px 12px;
-  display: flex; align-items: center; justify-content: space-between;
-  padding-top: calc(14px + env(safe-area-inset-top, 0px));
-}
-.header-brand { display: flex; align-items: center; gap: 10px; }
-.header-icon { width: 32px; height: 32px; border-radius: 50%; background: var(--gold-dim); border: 1px solid rgba(201,169,110,0.3); display: flex; align-items: center; justify-content: center; font-size: 14px; }
-.header-title { font-size: 16px; font-weight: 500; color: var(--text); }
-.header-date { font-size: 11px; color: var(--muted); }
-.header-right { display: flex; gap: 8px; }
-
-/* ── BOTTOM NAV ── */
-.bottom-nav {
-  position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
-  background: var(--surface);
-  border-top: 1px solid var(--border);
-  display: flex;
-  padding-bottom: var(--safe-bottom);
-  height: calc(var(--nav-h) + var(--safe-bottom));
-}
-.nav-btn {
-  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 3px; background: none; border: none; color: var(--muted);
-  font-family: 'DM Sans', sans-serif; font-size: 9px; font-weight: 400;
-  cursor: pointer; padding: 8px 2px; transition: color 0.15s; position: relative;
-}
-.nav-btn.active { color: var(--accent2); }
-.nav-btn.active::before {
-  content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
-  width: 28px; height: 2px; background: var(--accent); border-radius: 0 0 2px 2px;
-}
-.nav-icon-lg { font-size: 18px; line-height: 1; }
-.nav-btn-add {
-  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 4px; background: none; border: none; cursor: pointer; padding: 6px 4px;
-}
-.nav-add-circle {
-  width: 46px; height: 46px; border-radius: 50%;
-  background: var(--accent); display: flex; align-items: center; justify-content: center;
-  font-size: 24px; color: #1a1610; font-weight: 300; line-height: 1;
-  box-shadow: 0 4px 16px rgba(201,169,110,0.35);
-  margin-top: -18px;
-}
-.nav-btn-add span { font-size: 10px; color: var(--muted); }
-
-/* ── PAGES ── */
-.page { display: none; padding: 16px 16px 8px; animation: fadeUp 0.2s ease; }
-.page.active { display: block; }
-@keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-
-/* ── KPI GRID ── */
-.kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
-.kpi-grid .kpi { padding: 18px 16px; }
-.kpi-grid .kpi-value { font-size: 22px; }
-.kpi {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 14px 16px; position: relative; overflow: hidden;
-}
-.kpi::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
-.kpi.green::before { background: var(--green); }
-.kpi.red::before { background: var(--red); }
-.kpi.gold::before { background: var(--accent); }
-.kpi.blue::before { background: #5b8def; }
-.kpi-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.09em; color: var(--muted); margin-bottom: 5px; }
-.kpi-value { font-size: 19px; font-weight: 500; color: var(--text); line-height: 1.1; }
-.kpi-sub { font-size: 10px; color: var(--muted); margin-top: 4px; }
-.kpi-badge { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 20px; margin-top: 5px; }
-.badge-green { background: var(--green-dim); color: var(--green); }
-.badge-red { background: var(--red-dim); color: var(--red); }
-.badge-gold { background: var(--gold-dim); color: var(--accent2); }
-
-/* ── PANEL ── */
-.panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; }
-.panel-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; }
-.panel-title { font-size: 13px; font-weight: 500; color: var(--text); }
-.panel-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
-.panel-action { font-size: 12px; color: var(--accent); cursor: pointer; background: none; border: none; font-family: 'DM Sans', sans-serif; white-space: nowrap; }
-
-/* ── PAGE TITLE ── */
-.page-title { font-size: 22px; color: var(--text); margin-bottom: 4px; }
-.page-sub { font-size: 12px; color: var(--muted); margin-bottom: 16px; }
-
-/* ── BARS ── */
-.bars-wrap { display: flex; align-items: flex-end; gap: 5px; height: 100px; }
-.bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
-.bar-pair { display: flex; gap: 2px; align-items: flex-end; width: 100%; }
-.bar { border-radius: 3px 3px 0 0; min-height: 2px; transition: height 0.4s cubic-bezier(.4,0,.2,1); }
-.bar.rec { background: var(--green); }
-.bar.desp { background: rgba(224,90,90,0.5); }
-.bar-lbl { font-size: 9px; color: var(--muted); }
-.bars-legend { display: flex; gap: 12px; margin-bottom: 10px; }
-.bars-legend span { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); }
-.bl-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
-
-/* ── DONUT ── */
-.donut-wrap { display: flex; align-items: center; gap: 16px; }
-.donut-legend { display: flex; flex-direction: column; gap: 7px; flex: 1; min-width: 0; }
-.legend-row { display: flex; align-items: center; gap: 8px; }
-.legend-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-.legend-name { font-size: 12px; color: var(--muted); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.legend-pct { font-size: 12px; color: var(--text); font-weight: 500; }
-.progress-ring { transform: rotate(-90deg); }
-
-/* ── TX LIST ── */
-.tx-list { display: flex; flex-direction: column; }
-.tx-item { display: flex; align-items: center; gap: 10px; padding: 11px 0; border-bottom: 1px solid var(--border); }
-.tx-item:last-child { border-bottom: none; }
-.tx-bullet { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-.tx-body { flex: 1; min-width: 0; }
-.tx-name { font-size: 13px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.tx-meta { font-size: 11px; color: var(--muted); margin-top: 1px; }
-.tx-right { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; flex-shrink: 0; }
-.tx-amount { font-size: 13px; font-weight: 500; }
-.tx-amount.rec { color: var(--green); }
-.tx-amount.desp { color: var(--red); }
-.tx-date { font-size: 10px; color: var(--muted); }
-.del-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 16px; padding: 4px 6px; border-radius: 6px; flex-shrink: 0; }
-
-/* ── FORM ── */
-.form-col { display: flex; flex-direction: column; gap: 12px; }
-.fg { display: flex; flex-direction: column; gap: 5px; }
-.fg label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
-.fg input, .fg select {
-  background: var(--surface2); border: 1px solid var(--border);
-  border-radius: var(--radius-sm); color: var(--text);
-  font-family: 'DM Sans', sans-serif; font-size: 15px;
-  padding: 12px 14px; outline: none; transition: border 0.15s;
-  -webkit-appearance: none;
-}
-.fg input:focus, .fg select:focus { border-color: var(--accent); }
-.fg select option { background: #1a1714; }
-.type-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.type-btn {
-  padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border);
-  background: var(--surface2); color: var(--muted); font-family: 'DM Sans', sans-serif;
-  font-size: 14px; cursor: pointer; transition: all 0.15s; text-align: center;
-}
-.type-btn.active-rec { background: var(--green-dim); border-color: var(--green); color: var(--green); }
-.type-btn.active-desp { background: var(--red-dim); border-color: var(--red); color: var(--red); }
-.add-btn {
-  background: var(--accent); color: #1a1610; border: none; border-radius: var(--radius-sm);
-  font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500;
-  padding: 14px; cursor: pointer; transition: background 0.15s; width: 100%; margin-top: 4px;
-}
-.add-btn:active { background: var(--accent2); transform: scale(0.98); }
-
-/* ── CAT BARS ── */
-.cat-row { margin-bottom: 13px; }
-.cat-header { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 12px; }
-.cat-name { color: var(--muted); }
-.cat-val { color: var(--text); font-weight: 500; }
-.cat-bar-bg { height: 5px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
-.cat-bar-fill { height: 100%; border-radius: 3px; transition: width 0.5s cubic-bezier(.4,0,.2,1); }
-
-/* ── CHAT ── */
-.chat-msgs { max-height: 260px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-bottom: 4px; }
-.chat-msgs::-webkit-scrollbar { display: none; }
-.bubble { padding: 11px 14px; border-radius: 14px; font-size: 13px; line-height: 1.6; max-width: 86%; }
-.bubble.user { background: var(--gold-dim); color: var(--text); margin-left: auto; }
-.bubble.ai { background: var(--surface2); color: var(--muted); }
-.chat-in { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface2); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; }
-.chat-send { width: 36px; height: 36px; border-radius: 50%; background: var(--accent); color: #1a1610; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
-
-/* ── MODAL ── */
-.modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 500; align-items: flex-end; }
-.modal.open { display: flex; }
-.modal-content { background: var(--bg); border-top: 1px solid var(--border); border-radius: 18px 18px 0 0; width: 100%; max-height: 90vh; overflow-y: auto; padding: 20px 16px 24px; }
-.modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-.modal-title { font-size: 18px; font-weight: 500; color: var(--text); }
-.modal-close { background: none; border: none; color: var(--muted); font-size: 24px; cursor: pointer; padding: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; }
-
-/* ── EMPTY ── */
-.empty { text-align: center; padding: 32px 16px; color: var(--muted); font-size: 13px; }
-
-</style>
-</head>
-
-<body>
-
-<!-- ── HEADER ── -->
-<div class="app-header">
-  <div class="header-brand">
-    <div class="header-icon">✂</div>
-    <div>
-      <div class="header-title">Espaço Gabi</div>
-      <div class="header-date" id="header-date"></div>
-    </div>
-  </div>
-  <div class="header-right">
-    <button class="nav-btn" onclick="navTo('app')" style="position:static;gap:2px;padding:6px;border-radius:8px;background:var(--surface);margin:0">
-      <span style="font-size:16px">⚙</span>
-    </button>
-  </div>
-</div>
-
-<!-- ── PAGES ── -->
-
-<!-- Dashboard -->
-<div id="page-dashboard" class="page active">
-  <div class="page-title">Dashboard</div>
-  <div id="kpi-grid" class="kpi-grid"></div>
-  <div class="panel">
-    <div class="panel-header">
-      <div>
-        <div class="panel-title">Últimos lançamentos</div>
-        <div class="panel-sub">Receitas e despesas</div>
-      </div>
-    </div>
-    <div id="dash-recent" class="tx-list"></div>
-  </div>
-  <div class="panel">
-    <div class="panel-header">
-      <div>
-        <div class="panel-title">Receita por categoria</div>
-        <div class="panel-sub">Este mês</div>
-      </div>
-    </div>
-    <div id="cat-donut"></div>
-  </div>
-</div>
-
-<!-- Histórico -->
-<div id="page-historico" class="page">
-  <div class="page-title">Histórico</div>
-  <div class="page-sub" id="hist-count"></div>
-  <div class="panel">
-    <div id="all-txs" class="tx-list"></div>
-  </div>
-</div>
-
-<!-- Relatório -->
-<div id="page-relatorio" class="page">
-  <div class="page-title">Relatório</div>
-  <div class="page-sub">Últimos 7 dias</div>
-  <div class="panel">
-    <div class="bars-legend">
-      <span><span class="bl-dot" style="background:var(--green)"></span> Receita</span>
-      <span><span class="bl-dot" style="background:rgba(224,90,90,0.5)"></span> Despesa</span>
-    </div>
-    <div id="bars-7" class="bars-wrap"></div>
-  </div>
-  <div class="page-sub" style="margin-top:20px">Últimos 30 dias</div>
-  <div class="panel">
-    <div id="bars-30" class="bars-wrap"></div>
-  </div>
-</div>
-
-<!-- Meses -->
-<div id="page-meses" class="page">
-  <div class="page-title">Meses</div>
-  <div class="page-sub">Comparação mensal</div>
-  <div class="panel">
-    <div id="cat-meses"></div>
-  </div>
-</div>
-
-<!-- IA -->
-<div id="page-ia" class="page">
-  <div class="page-title">Assistente IA</div>
-  <div class="page-sub">Pergunte sobre seus dados</div>
-  <div class="panel" style="display:flex;flex-direction:column;gap:12px;height:400px">
-    <div id="chat-msgs" class="chat-msgs"></div>
-    <div style="display:flex;gap:8px">
-      <input id="chat-in" type="text" class="chat-in" placeholder="Faça uma pergunta..." onkeypress="if(event.key==='Enter') sendChat()"/>
-      <button class="chat-send" onclick="sendChat()">→</button>
-    </div>
-  </div>
-</div>
-
-<!-- App -->
-<div id="page-app" class="page">
-  <div class="page-title">App</div>
-  <div class="page-sub">Instalar e configurar</div>
-  
-  <div id="app-install-card" class="panel">
-    <div class="panel-header">
-      <div>
-        <div class="panel-title">📱 Instalar app</div>
-        <div class="panel-sub">Adicione à tela inicial do seu celular</div>
-      </div>
-    </div>
-    <div id="install-status" style="font-size:12px;color:var(--muted);margin-bottom:12px"></div>
-    <button id="btn-install-main" class="add-btn" onclick="doInstall()" style="opacity:0.45;pointer-events:none">Instalar no celular</button>
-  </div>
-
-  <div id="app-already" class="panel" style="display:none">
-    <div class="panel-header">
-      <div>
-        <div class="panel-title">✅ App instalado</div>
-        <div class="panel-sub">Você está usando a versão instalada</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="panel">
-    <div class="panel-header">
-      <div>
-        <div class="panel-title">🔔 Notificações</div>
-        <div class="panel-sub">Receba avisos de agendamentos</div>
-      </div>
-    </div>
-    <button id="btn-ativar-notif" class="add-btn" onclick="ativarNotifBtn()">Ativar notificações</button>
-    <div id="notif-result" style="font-size:12px;color:var(--muted);margin-top:12px;line-height:1.6"></div>
-  </div>
-
-  <div class="panel">
-    <div class="panel-header">
-      <div>
-        <div class="panel-title">ℹ️ Sobre</div>
-        <div class="panel-sub">Versão 2.0</div>
-      </div>
-    </div>
-    <div style="font-size:12px;color:var(--muted);line-height:1.8">
-      <strong>Espaço Gabi Borges</strong><br/>
-      Gestão de salão de beleza<br/>
-      <br/>
-      ✓ Financeiro integrado<br/>
-      ✓ Agenda com notificações<br/>
-      ✓ Funciona offline
-    </div>
-  </div>
-</div>
-
-<!-- Agenda -->
-<div id="page-agenda" class="page">
-  <div class="page-title">Agenda</div>
-  <div class="page-sub" id="agenda-sub"></div>
-  
-  <div class="panel">
-    <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:8px" id="date-strip"></div>
-  </div>
-
-  <div class="panel">
-    <div class="panel-header">
-      <div class="panel-title" id="agenda-day-title"></div>
-    </div>
-    <div id="agenda-list"></div>
-  </div>
-
-  <div class="panel">
-    <div class="panel-header">
-      <div class="panel-title">Próximos agendamentos</div>
-    </div>
-    <div id="agenda-proximos"></div>
-  </div>
-</div>
-
-<!-- ── BOTTOM NAV ── -->
-<div class="bottom-nav">
-  <button id="nav-dashboard" class="nav-btn active" onclick="navTo('dashboard')">
-    <span class="nav-icon-lg">📊</span>
-    <span>Dashboard</span>
-  </button>
-  <button id="nav-historico" class="nav-btn" onclick="navTo('historico')">
-    <span class="nav-icon-lg">📋</span>
-    <span>Histórico</span>
-  </button>
-  <button id="nav-relatorio" class="nav-btn" onclick="navTo('relatorio')">
-    <span class="nav-icon-lg">📈</span>
-    <span>Relatório</span>
-  </button>
-  <button id="nav-meses" class="nav-btn" onclick="navTo('meses')">
-    <span class="nav-icon-lg">📅</span>
-    <span>Meses</span>
-  </button>
-  <button id="nav-ia" class="nav-btn" onclick="navTo('ia')">
-    <span class="nav-icon-lg">🤖</span>
-    <span>IA</span>
-  </button>
-  <button class="nav-btn-add" onclick="openModal()">
-    <div class="nav-add-circle">+</div>
-    <span>Novo</span>
-  </button>
-  <button id="nav-agenda" class="nav-btn" onclick="navTo('agenda')">
-    <span class="nav-icon-lg">📅</span>
-    <span>Agenda</span>
-  </button>
-  <button id="nav-app" class="nav-btn" onclick="navTo('app')">
-    <span class="nav-icon-lg">⚙</span>
-    <span>App</span>
-  </button>
-</div>
-
-<!-- ── MODAL LANÇAMENTO ── -->
-<div id="modal" class="modal" onclick="closeModalOutside(event)">
-  <div class="modal-content">
-    <div class="modal-header">
-      <div class="modal-title">Novo lançamento</div>
-      <button class="modal-close" onclick="closeModal()">×</button>
-    </div>
-    <div class="form-col">
-      <div class="type-row">
-        <button id="btn-rec" class="type-btn active-rec" onclick="setTipo('receita')">📈 Receita</button>
-        <button id="btn-desp" class="type-btn" onclick="setTipo('despesa')">📉 Despesa</button>
-      </div>
-      <div class="fg">
-        <label>Descrição</label>
-        <input id="f-desc" type="text" placeholder="Ex: Corte cabelo"/>
-      </div>
-      <div class="fg">
-        <label>Categoria</label>
-        <select id="f-cat">
-          <option>Serviços</option>
-          <option>Produtos</option>
-          <option>Aluguel</option>
-          <option>Salários</option>
-          <option>Fornecedores</option>
-        </select>
-      </div>
-      <div class="fg">
-        <label>Valor</label>
-        <input id="f-val" type="number" placeholder="0.00" step="0.01"/>
-      </div>
-      <button class="add-btn" onclick="addTx()">✓ Confirmar</button>
-    </div>
-  </div>
-</div>
-
-<!-- ── MODAL AGENDAMENTO ── -->
-<div id="modal-agenda" class="modal" onclick="closeAgendaModalOutside(event)">
-  <div class="modal-content">
-    <div class="modal-header">
-      <div id="agenda-modal-title" class="modal-title">Novo agendamento</div>
-      <button class="modal-close" onclick="closeAgendaModal()">×</button>
-    </div>
-    <div class="form-col">
-      <div class="fg">
-        <label>Cliente</label>
-        <input id="ag-cliente" type="text" placeholder="Nome da cliente"/>
-      </div>
-      <div class="fg">
-        <label>Serviço</label>
-        <input id="ag-servico" type="text" placeholder="Ex: Corte + Barba"/>
-      </div>
-      <div class="fg">
-        <label>Data</label>
-        <input id="ag-data" type="date"/>
-      </div>
-      <div class="fg">
-        <label>Hora</label>
-        <input id="ag-hora" type="time"/>
-      </div>
-      <div class="fg">
-        <label>Observação (opcional)</label>
-        <input type="text" id="ag-obs" placeholder="Ex: cabelo comprido, alergia..."/>
-      </div>
-      <button class="add-btn" onclick="saveAgendamento()">✓ Confirmar agendamento</button>
-      <button id="ag-del-btn" onclick="delAgendamento()" style="display:none;width:100%;background:var(--red-dim);color:var(--red);border:1px solid rgba(224,90,90,0.3);border-radius:10px;padding:13px;font-family:DM Sans,sans-serif;font-size:14px;cursor:pointer;margin-top:4px">Excluir agendamento</button>
-    </div>
-  </div>
-</div>
-
-<script>
-// ── DATA ──
-let txs = [];
-try { txs = JSON.parse(localStorage.getItem('salon_txs_v3') || '[]'); } catch(e){}
-function save() { try { localStorage.setItem('salon_txs_v3', JSON.stringify(txs)); } catch(e){} }
-
-// ── AGENDAMENTOS DATA ──
-let agendas = [];
-try { agendas = JSON.parse(localStorage.getItem('salon_agendas_v1') || '[]'); } catch(e){}
-function saveAgendas() { try { localStorage.setItem('salon_agendas_v1', JSON.stringify(agendas)); } catch(e){} }
-
-// ── UTILS ──
-const R = v => 'R$ ' + parseFloat(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
-const today = () => new Date().toISOString().split('T')[0];
-const thisMonth = () => { const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); };
-const daysAgo = n => { const d=new Date(); d.setDate(d.getDate()-n); return d.toISOString().split('T')[0]; };
-const fmtDate = s => new Date(s+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
-const catColors = ['#4caf7d','#c9a96e','#5b8def','#e05a5a','#a57ee8','#5bc4d4','#f0a050'];
-
-function metrics() {
-  const t=today(), m=thisMonth();
-  const todayR=txs.filter(x=>x.date===t&&x.tipo==='receita').reduce((a,x)=>a+x.val,0);
-  const todayD=txs.filter(x=>x.date===t&&x.tipo==='despesa').reduce((a,x)=>a+x.val,0);
-  const mthR=txs.filter(x=>x.date.startsWith(m)&&x.tipo==='receita').reduce((a,x)=>a+x.val,0);
-  const mthD=txs.filter(x=>x.date.startsWith(m)&&x.tipo==='despesa').reduce((a,x)=>a+x.val,0);
-  const totalR=txs.filter(x=>x.tipo==='receita').reduce((a,x)=>a+x.val,0);
-  const totalD=txs.filter(x=>x.tipo==='despesa').reduce((a,x)=>a+x.val,0);
-  return {todayR,todayD,mthR,mthD,totalR,totalD};
-}
-
-function catBreakdown(tipo, filter) {
-  const cats={};
-  txs.filter(x=>x.tipo===tipo&&(!filter||x.date.startsWith(filter))).forEach(x=>{cats[x.cat]=(cats[x.cat]||0)+x.val;});
-  return Object.entries(cats).sort((a,b)=>b[1]-a[1]);
-}
-
-// ── NAV ──
-const PAGES = ['dashboard','historico','relatorio','meses','ia','app','agenda'];
-function navTo(page) {
-  PAGES.forEach(p=>{
-    const el=document.getElementById('page-'+p);
-    if(el) el.classList.toggle('active', p===page);
-    const nb=document.getElementById('nav-'+p);
-    if(nb) nb.classList.toggle('active', p===page);
-  });
-  window.scrollTo(0,0);
-  renders[page] && renders[page]();
-}
-
-const renders = {
-  dashboard: renderDashboard,
-  historico: renderHistorico,
-  relatorio: renderRelatorio,
-  meses: renderMeses,
-  ia: renderIA,
-  app: renderApp,
-  agenda: renderAgenda,
-};
-
-// ── TX ITEM HTML ──
-function txItem(tx, showDel=true) {
-  return `<div class="tx-item">
-    <div class="tx-bullet" style="background:${tx.tipo==='receita'?'var(--green)':'var(--red)'}"></div>
-    <div class="tx-body">
-      <div class="tx-name">${tx.desc}</div>
-      <div class="tx-meta">${tx.cat}</div>
-    </div>
-    <div class="tx-right">
-      <div class="tx-amount ${tx.tipo==='receita'?'rec':'desp'}">${tx.tipo==='receita'?'+':'-'}${R(tx.val)}</div>
-      <div class="tx-date">${fmtDate(tx.date)}</div>
-    </div>
-    ${showDel?`<button class="del-btn" onclick="delTx(${tx.id})">✕</button>`:''}
-  </div>`;
-}
-
-function txList(list, showDel=true) {
-  return list.length ? list.map(x=>txItem(x,showDel)).join('') : '<div class="empty">Nenhum lançamento encontrado.</div>';
-}
-
-// ── DASHBOARD ──
-function renderDashboard() {
-  const now=new Date();
-  document.getElementById('header-date').textContent = now.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'});
-  const {todayR,todayD,mthR,mthD}=metrics();
-  const lucro=mthR-mthD;
-  const margem=mthR>0?((lucro/mthR)*100).toFixed(0):0;
-  document.getElementById('kpi-grid').innerHTML=`
-    <div class="kpi green">
-      <div class="kpi-label">Receita hoje</div>
-      <div class="kpi-value">${R(todayR)}</div>
-      <div class="kpi-sub">Despesa: ${R(todayD)}</div>
-      <div class="kpi-badge badge-green">Hoje</div>
-    </div>
-    <div class="kpi gold">
-      <div class="kpi-label">Faturamento mês</div>
-      <div class="kpi-value">${R(mthR)}</div>
-      <div class="kpi-sub">Despesas: ${R(mthD)}</div>
-      <div class="kpi-badge badge-gold">Mês atual</div>
-    </div>
-    <div class="kpi ${lucro>=0?'green':'red'}">
-      <div class="kpi-label">Lucro líquido</div>
-      <div class="kpi-value" style="color:${lucro>=0?'var(--green)':'var(--red)'}">${R(lucro)}</div>
-      <div class="kpi-sub">Margem: ${margem}%</div>
-      <div class="kpi-badge ${lucro>=0?'badge-green':'badge-red'}">${lucro>=0?'Positivo':'Negativo'}</div>
-    </div>
-    <div class="kpi blue">
-      <div class="kpi-label">Saldo total</div>
-      <div class="kpi-value">${R(txs.filter(x=>x.tipo==='receita').reduce((a,x)=>a+x.val,0)-txs.filter(x=>x.tipo==='despesa').reduce((a,x)=>a+x.val,0))}</div>
-      <div class="kpi-sub">${txs.length} lançamentos</div>
-      <div class="kpi-badge" style="background:rgba(91,141,239,0.12);color:#5b8def">Histórico</div>
-    </div>`;
-  renderCatDonut();
-  const recent=[...txs].sort((a,b)=>b.date.localeCompare(a.date)||b.id-a.id).slice(0,6);
-  document.getElementById('dash-recent').innerHTML=txList(recent);
-}
-
-function renderBars(elId, days) {
-  const dates=Array.from({length:days},(_,i)=>daysAgo(days-1-i));
-  const recByDay=dates.map(d=>txs.filter(x=>x.date===d&&x.tipo==='receita').reduce((a,x)=>a+x.val,0));
-  const despByDay=dates.map(d=>txs.filter(x=>x.date===d&&x.tipo==='despesa').reduce((a,x)=>a+x.val,0));
-  const max=Math.max(...recByDay,...despByDay,1);
-  document.getElementById(elId).innerHTML=dates.map((d,i)=>{
-    const rh=Math.round((recByDay[i]/max)*100);
-    const dh=Math.round((despByDay[i]/max)*100);
-    const lbl=new Date(d+'T12:00:00').toLocaleDateString('pt-BR',{weekday:days<=7?'short':'2-digit'}).replace('.','');
-    return `<div class="bar-col"><div class="bar-pair"><div class="bar rec" style="flex:1;height:${rh}%"></div><div class="bar desp" style="flex:1;height:${dh}%"></div></div><div class="bar-lbl">${lbl}</div></div>`;
-  }).join('');
-}
-
-function renderCatDonut() {
-  const cats=catBreakdown('receita',thisMonth());
-  const total=cats.reduce((a,x)=>a+x[1],0)||1;
-  let html='<div class="donut-wrap"><svg width="72" height="72" viewBox="0 0 80 80">';
-  let offset=0;
-  const r=30,cx=40,cy=40,circ=2*Math.PI*r;
-  cats.forEach(([cat,val],i)=>{
-    const pct=val/total,dash=circ*pct,gap=circ-dash;
-    html+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${catColors[i%catColors.length]}" stroke-width="14" stroke-dasharray="${dash.toFixed(2)} ${gap.toFixed(2)}" stroke-dashoffset="${(-offset*circ).toFixed(2)}" class="progress-ring"/>`;
-    offset+=pct;
-  });
-  html+='</svg><div class="donut-legend">';
-  cats.slice(0,5).forEach(([cat,val],i)=>{
-    const pct=((val/total)*100).toFixed(0);
-    html+=`<div class="legend-row"><div class="legend-dot" style="background:${catColors[i%catColors.length]}"></div><div class="legend-name">${cat}</div><div class="legend-pct">${pct}%</div></div>`;
-  });
-  html+='</div></div>';
-  if(!cats.length) html='<div class="empty">Nenhuma receita este mês.</div>';
-  document.getElementById('cat-donut').innerHTML=html;
-}
-
-// ── HISTÓRICO ──
-function renderHistorico() {
-  const sorted=[...txs].sort((a,b)=>b.date.localeCompare(a.date)||b.id-a.id);
-  document.getElementById('hist-count').textContent=`${sorted.length} registros`;
-  document.getElementById('all-txs').innerHTML=txList(sorted);
-}
-
-function delTx(id) {
-  txs=txs.filter(x=>x.id!==id);
-  save();
-  renderDashboard();
-  renderHistorico();
-}
-
-// ── LANÇAMENTO (MODAL) ──
-let tipoAtual='receita';
-function setTipo(t) {
-  tipoAtual=t;
-  document.getElementById('btn-rec').className='type-btn'+(t==='receita'?' active-rec':'');
-  document.getElementById('btn-desp').className='type-btn'+(t==='despesa'?' active-desp':'');
-}
-function openModal() {
-  document.getElementById('modal').classList.add('open');
-  document.body.style.overflow='hidden';
-  setTimeout(()=>document.getElementById('f-desc').focus(),300);
-}
-function closeModal() {
-  document.getElementById('modal').classList.remove('open');
-  document.body.style.overflow='';
-}
-function closeModalOutside(e) { if(e.target===document.getElementById('modal')) closeModal(); }
-function addTx() {
-  const desc=document.getElementById('f-desc').value.trim();
-  const val=parseFloat(document.getElementById('f-val').value);
-  const cat=document.getElementById('f-cat').value;
-  if(!desc||!val||val<=0){alert('Preencha a descrição e o valor.');return;}
-  txs.push({id:Date.now(),desc,val,tipo:tipoAtual,cat,date:today()});
-  save();
-  document.getElementById('f-desc').value='';
-  document.getElementById('f-val').value='';
-  closeModal();
-  renderDashboard();
-  renderHistorico();
-}
-
-// ── RELATÓRIO ──
-function renderRelatorio() {
-  renderBars('bars-7', 7);
-  renderBars('bars-30', 30);
-}
-
-// ── MESES ──
-function renderMeses() {
-  const months = {};
-  txs.forEach(x => {
-    const m = x.date.substring(0, 7);
-    if (!months[m]) months[m] = {rec: 0, desp: 0};
-    if (x.tipo === 'receita') months[m].rec += x.val;
-    else months[m].desp += x.val;
-  });
-  const sorted = Object.entries(months).sort().reverse().slice(0, 12);
-  let html = '';
-  sorted.forEach(([m, {rec, desp}]) => {
-    const lucro = rec - desp;
-    const d = new Date(m + '-01');
-    const label = d.toLocaleDateString('pt-BR', {month: 'long', year: 'numeric'});
-    html += `<div class="cat-row">
-      <div class="cat-header">
-        <div class="cat-name">${label}</div>
-        <div class="cat-val">${R(lucro)}</div>
-      </div>
-      <div class="cat-bar-bg"><div class="cat-bar-fill" style="width:${Math.min((lucro/(Math.max(...sorted.map(([,{rec,desp}])=>rec-desp))||1))*100,100)}%;background:${lucro>=0?'var(--green)':'var(--red)'}"></div></div>
-    </div>`;
-  });
-  document.getElementById('cat-meses').innerHTML = html || '<div class="empty">Sem dados</div>';
-}
-
-// ── IA ──
-function renderIA() {}
-async function sendChat() {
-  const msg = document.getElementById('chat-in').value.trim();
-  if (!msg) return;
-  addBubble(msg, 'user');
-  document.getElementById('chat-in').value = '';
-  const lid = addBubble('...', 'ai');
-  try {
-    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:window._iaCtx||'',messages:[{role:'user',content:msg}]})});
-    const data=await r.json();
-    const text=data.content?.map(c=>c.text||'').join('')||'Não consegui responder agora.';
-    const el=document.getElementById(lid);
-    el.className='bubble ai'; el.textContent=text;
-  } catch(e) {
-    const el=document.getElementById(lid);
-    el.className='bubble ai'; el.textContent='Erro ao conectar. Tente novamente.';
-  }
-  const msgs=document.getElementById('chat-msgs');
-  msgs.scrollTop=msgs.scrollHeight;
-}
-function qask(q){document.getElementById('chat-in').value=q;sendChat();}
-let bc=0;
-function addBubble(text,cls){
-  const id='b'+(++bc);
-  const d=document.createElement('div');
-  d.className='bubble '+cls; d.id=id; d.textContent=text;
-  document.getElementById('chat-msgs').appendChild(d);
-  document.getElementById('chat-msgs').scrollTop=99999;
-  return id;
-}
-
-// ── APP INSTALL ──
-async function ativarNotifBtn() {
-  const btn = document.getElementById('btn-ativar-notif');
-  const result = document.getElementById('notif-result');
-  if (!('Notification' in window)) {
-    result.textContent = '❌ Seu navegador não suporta notificações.';
-    return;
-  }
-  if (Notification.permission === 'granted') {
-    agendarNotificacoes();
-    btn.textContent = '✅ Avisos ativados';
-    btn.style.background = 'var(--green-dim)';
-    btn.style.color = 'var(--green)';
-    btn.style.border = '1px solid rgba(76,175,125,0.3)';
-    result.textContent = 'Você receberá um aviso 1 hora antes de cada agendamento.';
-    return;
-  }
-  const perm = await Notification.requestPermission();
-  if (perm === 'granted') {
-    agendarNotificacoes();
-    btn.textContent = '✅ Avisos ativados!';
-    btn.style.background = 'var(--green-dim)';
-    btn.style.color = 'var(--green)';
-    btn.style.border = '1px solid rgba(76,175,125,0.3)';
-    result.textContent = 'Perfeito! Você receberá um aviso 1 hora antes de cada agendamento.';
-  } else {
-    btn.style.opacity = '0.5';
-    result.innerHTML = '⚠️ Permissão negada. Vá em <strong style="color:var(--text)">Configurações do Chrome → Notificações</strong> e ative para este site.';
-  }
-}
-
-function updateNotifBtn() {
-  const btn = document.getElementById('btn-ativar-notif');
-  const result = document.getElementById('notif-result');
-  if (!btn) return;
-  if (!('Notification' in window)) {
-    btn.textContent = '❌ Notificações não suportadas';
-    btn.style.opacity = '0.4'; btn.style.pointerEvents = 'none';
-    return;
-  }
-  if (Notification.permission === 'granted') {
-    btn.textContent = '✅ Avisos ativados';
-    btn.style.background = 'var(--green-dim)';
-    btn.style.color = 'var(--green)';
-    btn.style.border = '1px solid rgba(76,175,125,0.3)';
-    result.textContent = 'Você receberá um aviso 1 hora antes de cada agendamento.';
-  } else if (Notification.permission === 'denied') {
-    btn.style.opacity = '0.45'; btn.style.pointerEvents = 'none';
-    result.innerHTML = '⚠️ Permissão bloqueada. Ative nas configurações do Chrome.';
-  }
-}
-
-function renderApp() {
-  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-  if (isStandalone) {
-    document.getElementById('app-install-card').style.display = 'none';
-    document.getElementById('app-already').style.display = 'flex';
-    updateNotifBtn();
-    return;
-  }
-  updateNotifBtn();
-  const status = document.getElementById('install-status');
-  const btn = document.getElementById('btn-install-main');
-  if (deferredPrompt) {
-    btn.style.opacity = '1';
-    btn.style.pointerEvents = 'auto';
-    status.textContent = 'Clique para instalar o app no seu celular.';
-  } else {
-    btn.style.opacity = '0.45';
-    btn.style.pointerEvents = 'none';
-    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-    if (isIOS) {
-      status.innerHTML = '📱 No iPhone: use o <strong style="color:var(--text)">Safari</strong> e o botão de compartilhar ⬆ abaixo.';
-    } else {
-      status.textContent = 'Use o Chrome para instalar. Siga as instruções abaixo.';
-    }
-  }
-}
-
-// ── AGENDAMENTOS ──
-let selectedDate = today();
-let editingAgendaId = null;
-
-function renderAgenda() {
-  const now = new Date();
-  document.getElementById('agenda-sub').textContent = now.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'});
-
-  const strip = document.getElementById('date-strip');
-  strip.innerHTML = '';
-  for (let i = 0; i < 14; i++) {
-    const d = new Date(); d.setDate(d.getDate() + i);
-    const iso = d.toISOString().split('T')[0];
-    const count = agendas.filter(a => a.data === iso && a.status !== 'cancelado').length;
-    const isSelected = iso === selectedDate;
-    const isToday = iso === today();
-    const btn = document.createElement('button');
-    btn.style.cssText = `flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 14px;border-radius:12px;border:1px solid ${isSelected?'rgba(201,169,110,0.5)':'var(--border)'};background:${isSelected?'var(--gold-dim)':'var(--surface)'};cursor:pointer;min-width:54px;`;
-    const dayName = d.toLocaleDateString('pt-BR',{weekday:'short'}).replace('.','');
-    const dayNum = d.getDate();
-    btn.innerHTML = `
-      <span style="font-size:10px;color:${isSelected?'var(--accent2)':'var(--muted)'};">${isToday?'hoje':dayName}</span>
-      <span style="font-size:17px;font-weight:500;color:${isSelected?'var(--accent2)':'var(--text)'};">${dayNum}</span>
-      ${count>0?`<span style="width:18px;height:18px;border-radius:50%;background:${isSelected?'var(--accent)':'var(--surface2)'};border:1px solid ${isSelected?'rgba(201,169,110,0.4)':'var(--border2)'};font-size:10px;display:flex;align-items:center;justify-content:center;color:${isSelected?'#1a1610':'var(--muted)'};">${count}</span>`:'<span style="width:18px;height:18px;"></span>'}
-    `;
-    btn.onclick = () => { selectedDate = iso; renderAgenda(); };
-    strip.appendChild(btn);
-  }
-  setTimeout(() => {
-    const idx = Array.from(strip.children).findIndex(b => b.querySelector('span:nth-child(2)')?.textContent == new Date(selectedDate+'T12:00:00').getDate());
-    if (idx >= 0) strip.children[idx]?.scrollIntoView({inline:'center',behavior:'smooth'});
-  }, 50);
-
-  const selD = new Date(selectedDate+'T12:00:00');
-  const selLabel = selectedDate === today() ? 'Hoje' : selD.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'});
-  document.getElementById('agenda-day-title').textContent = selLabel;
-
-  const dayItems = agendas.filter(a=>a.data===selectedDate).sort((a,b)=>a.hora.localeCompare(b.hora));
-  document.getElementById('agenda-list').innerHTML = dayItems.length
-    ? dayItems.map(agendaItem).join('')
-    : '<div class="empty">Nenhum agendamento neste dia.</div>';
-
-  const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate()+1);
-  const tomorrowISO = tomorrow.toISOString().split('T')[0];
-  const proximos = agendas
-    .filter(a=>a.data>=tomorrowISO&&a.data!==selectedDate&&a.status!=='cancelado')
-    .sort((a,b)=>a.data.localeCompare(b.data)||a.hora.localeCompare(b.hora))
-    .slice(0,10);
-  document.getElementById('agenda-proximos').innerHTML = proximos.length
-    ? proximos.map(agendaItem).join('')
-    : '<div class="empty">Nenhum agendamento futuro.</div>';
-}
-
-function agendaItem(a) {
-  const statusColor = a.status==='confirmado' ? 'var(--green)' : a.status==='cancelado' ? 'var(--red)' : 'var(--accent)';
-  const statusLabel = a.status==='confirmado' ? 'Confirmado' : a.status==='cancelado' ? 'Cancelado' : 'Pendente';
-  return `<div onclick="editAgenda(${a.id})" style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer;">
-    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:44px;background:var(--surface2);border-radius:10px;padding:6px 4px;">
-      <span style="font-size:15px;font-weight:500;color:var(--text);">${a.hora}</span>
-    </div>
-    <div style="flex:1;min-width:0">
-      <div style="font-size:14px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${a.cliente}</div>
-      <div style="font-size:12px;color:var(--muted);margin-top:2px">${a.servico}${a.obs?` · ${a.obs}`:''}</div>
-    </div>
-    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
-      <span style="font-size:10px;padding:3px 8px;border-radius:20px;background:${statusColor}22;color:${statusColor}">${statusLabel}</span>
-    </div>
-  </div>`;
-}
-
-function openAgendaModal(date) {
-  document.getElementById('modal').classList.remove('open');
-  editingAgendaId = null;
-  document.getElementById('ag-cliente').value = '';
-  document.getElementById('ag-servico').value = '';
-  document.getElementById('ag-data').value = date || selectedDate;
-  document.getElementById('ag-hora').value = '';
-  document.getElementById('ag-obs').value = '';
-  document.getElementById('agenda-modal-title').textContent = 'Novo agendamento';
-  document.getElementById('ag-del-btn').style.display = 'none';
-  document.getElementById('modal-agenda').classList.add('open');
-  document.body.style.overflow = 'hidden';
-  setTimeout(() => document.getElementById('ag-cliente').focus(), 300);
-}
-
-function editAgenda(id) {
-  const a = agendas.find(x=>x.id===id);
-  if (!a) return;
-  editingAgendaId = id;
-  document.getElementById('ag-cliente').value = a.cliente;
-  document.getElementById('ag-servico').value = a.servico;
-  document.getElementById('ag-data').value = a.data;
-  document.getElementById('ag-hora').value = a.hora;
-  document.getElementById('ag-obs').value = a.obs||'';
-  document.getElementById('agenda-modal-title').textContent = 'Editar agendamento';
-  document.getElementById('ag-del-btn').style.display = 'block';
-  document.getElementById('modal-agenda').classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-
-function saveAgendamento() {
-  const cliente = document.getElementById('ag-cliente').value.trim();
-  const servico = document.getElementById('ag-servico').value.trim();
-  const data    = document.getElementById('ag-data').value;
-  const hora    = document.getElementById('ag-hora').value;
-  const obs     = document.getElementById('ag-obs').value.trim();
-  if (!cliente||!servico||!data||!hora) { alert('Preencha cliente, serviço, data e horário.'); return; }
-  if (editingAgendaId) {
-    const idx = agendas.findIndex(x=>x.id===editingAgendaId);
-    if (idx>=0) agendas[idx] = {...agendas[idx], cliente, servico, data, hora, obs};
-  } else {
-    agendas.push({ id: Date.now(), cliente, servico, data, hora, obs, status:'pendente' });
-  }
-  saveAgendas();
-  
-  // ═══════════════════════════════════════════════════════════════
-  // MUDANÇA 2: Sincroniza IMEDIATAMENTE após salvar
-  // ═══════════════════════════════════════════════════════════════
-  if (Notification.permission === 'granted') {
-    reagendarNotificacoes();
-  } else {
-    console.log('[APP] ℹ️ Notificações não ativadas');
-  }
-  
-  closeAgendaModal();
-  selectedDate = data;
-  renderAgenda();
-}
-
-function delAgendamento() {
-  if (!editingAgendaId) return;
-  agendas = agendas.filter(x=>x.id!==editingAgendaId);
-  saveAgendas();
-  closeAgendaModal();
-  renderAgenda();
-}
-
-function closeAgendaModal() {
-  document.getElementById('modal-agenda').classList.remove('open');
-  document.body.style.overflow = '';
-  editingAgendaId = null;
-}
-
-function closeAgendaModalOutside(e) {
-  if (e.target===document.getElementById('modal-agenda')) closeAgendaModal();
-}
-
-// ── INIT ──
-renderDashboard();
-iniciarNotificacoes();
-
-// ── PWA: SERVICE WORKER ──
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    const swPath = new URL('./sw.js', location.href).href;
-    const scope  = new URL('./',     location.href).href;
-    navigator.serviceWorker.register(swPath, { scope }).catch(err => {
-      console.warn('SW não registrado:', err);
-    });
-  });
-}
-
-// ── PWA: BANNER "INSTALAR APP" ──
-let deferredPrompt = null;
-window.addEventListener('beforeinstallprompt', e => {
-  e.preventDefault();
-  deferredPrompt = e;
-  setTimeout(() => {
-    if (deferredPrompt) showInstallBanner();
-  }, 3000);
-});
-window.addEventListener('appinstalled', () => {
-  hideInstallBanner();
-  deferredPrompt = null;
-});
-
-function showInstallBanner() {
-  if (document.getElementById('install-banner')) return;
-  const banner = document.createElement('div');
-  banner.id = 'install-banner';
-  banner.style.cssText = `
-    position:fixed; bottom:calc(72px + env(safe-area-inset-bottom,0px)); left:12px; right:12px;
-    background:#211f1b; border:1px solid rgba(201,169,110,0.35); border-radius:14px;
-    padding:14px 16px; display:flex; align-items:center; gap:12px;
-    z-index:300; box-shadow:0 8px 32px rgba(0,0,0,0.5);
-    animation: slideUp 0.3s cubic-bezier(.4,0,.2,1);
-  `;
-  banner.innerHTML = `
-    <div style="width:40px;height:40px;border-radius:10px;background:rgba(201,169,110,0.1);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">✂</div>
-    <div style="flex:1;min-width:0">
-      <div style="font-size:13px;font-weight:500;color:#f0ece4">Instalar app</div>
-      <div style="font-size:11px;color:#8a8278;margin-top:2px">Adicionar à tela inicial</div>
-    </div>
-    <button onclick="doInstall()" style="background:#c9a96e;color:#1a1610;border:none;border-radius:8px;padding:8px 14px;font-family:DM Sans,sans-serif;font-size:13px;font-weight:500;cursor:pointer;flex-shrink:0">Instalar</button>
-    <button onclick="hideInstallBanner()" style="background:none;border:none;color:#8a8278;font-size:20px;cursor:pointer;padding:0 2px;flex-shrink:0;line-height:1">×</button>
-  `;
-  document.body.appendChild(banner);
-}
-
-function hideInstallBanner() {
-  const b = document.getElementById('install-banner');
-  if (b) b.remove();
-}
-
-async function doInstall() {
-  if (!deferredPrompt) return;
-  deferredPrompt.prompt();
-  const { outcome } = await deferredPrompt.userChoice;
-  deferredPrompt = null;
-  hideInstallBanner();
-  renderApp();
-}
-
-// ── NOTIFICAÇÕES VIA SERVICE WORKER ──
-
-async function pedirPermissaoNotificacao() {
-  if (!('Notification' in window)) return false;
-  if (Notification.permission === 'granted') return true;
-  if (Notification.permission === 'denied') return false;
-  const result = await Notification.requestPermission();
-  return result === 'granted';
-}
-
-// Envia agendamentos para o SW e aguarda confirmação
-async function sincronizarAgendaSW() {
-  if (!('serviceWorker' in navigator)) return 0;
-  if (Notification.permission !== 'granted') return 0;
-  const reg = await navigator.serviceWorker.ready;
-  if (!reg || !reg.active) return 0;
-
-  return new Promise(resolve => {
-    const handler = event => {
-      if (event.data?.tipo === 'AGENDADOS') {
-        navigator.serviceWorker.removeEventListener('message', handler);
-        resolve(event.data.total || 0);
-      }
-    };
-    navigator.serviceWorker.addEventListener('message', handler);
-    reg.active.postMessage({ tipo: 'AGENDAMENTOS', agendas });
-    setTimeout(() => { navigator.serviceWorker.removeEventListener('message', handler); resolve(0); }, 3000);
-  });
-}
-
-// ═══════════════════════════════════════════════════════════════
-// MUDANÇA 1: Função reagendarNotificacoes() CORRIGIDA
-// ═══════════════════════════════════════════════════════════════
-async function reagendarNotificacoes() {
-  if (Notification.permission !== 'granted') return;
-  
-  try {
-    const reg = await navigator.serviceWorker.ready;
-    if (reg && reg.active) {
-      // Envia a mensagem de sincronização
-      reg.active.postMessage({ tipo: 'AGENDAMENTOS', agendas });
-      console.log('[APP] ✅ Agendamentos sincronizados com SW');
-      
-      // Tenta registrar Periodic Sync (15 minutos)
-      if ('periodicSync' in reg) {
-        try {
-          await reg.periodicSync.register('sync-agendas', {
-            minInterval: 15 * 60 * 1000 // 15 minutos
-          });
-          console.log('[APP] ✅ Periodic Sync registrado');
-        } catch (e) {
-          console.log('[APP] ⚠️ Periodic Sync não disponível:', e.message);
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Espaço Gabi Borges - Financeiro</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:wght@400&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-      }
-    }
-  } catch (e) {
-    console.log('[APP] ❌ Erro ao sincronizar:', e.message);
-  }
-}
 
-// Chamada ao clicar no botão — pede permissão e sincroniza
-async function agendarNotificacoes() {
-  const total = await sincronizarAgendaSW();
-  const result = document.getElementById('notif-result');
-  if (result) {
-    const futuros = agendas.filter(ag => {
-      if (!ag.data || !ag.hora || ag.status === 'cancelado') return false;
-      const dt = new Date(ag.data + 'T' + ag.hora + ':00').getTime() - 3600000;
-      return dt > Date.now();
-    }).length;
-    if (futuros > 0) {
-      result.innerHTML = `✅ ${futuros} aviso${futuros>1?'s':''} agendado${futuros>1?'s':''} — você será avisada 1h antes de cada cliente.`;
-    } else {
-      result.textContent = 'Avisos ativados! Adicione agendamentos futuros para receber lembretes.';
-    }
-  }
-}
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            height: 100vh;
+            overflow: hidden;
+        }
 
-async function iniciarNotificacoes() {
-  const ok = await pedirPermissaoNotificacao();
-  if (ok) agendarNotificacoes();
-}
+        .container {
+            display: flex;
+            height: 100vh;
+        }
 
-// ═══════════════════════════════════════════════════════════════
-// MUDANÇA 3: Inicialização CORRIGIDA com Periodic Sync
-// ═══════════════════════════════════════════════════════════════
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.ready.then(async (reg) => {
-    console.log('[APP] ✅ Service Worker pronto');
-    
-    // Sincroniza agendamentos existentes
-    if (Notification.permission === 'granted') {
-      reg.active.postMessage({ tipo: 'AGENDAMENTOS', agendas });
-      console.log('[APP] ✅ Agendamentos sincronizados ao iniciar');
-      
-      // Registra Periodic Sync
-      if ('periodicSync' in reg) {
-        try {
-          await reg.periodicSync.register('sync-agendas', {
-            minInterval: 15 * 60 * 1000
-          });
-          console.log('[APP] ✅ Periodic Sync registrado ao iniciar');
-        } catch (e) {}
-      }
-    }
-  });
-}
+        /* SIDEBAR MENU */
+        .sidebar {
+            width: 280px;
+            background: rgba(20, 20, 40, 0.95);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            overflow-y: auto;
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            z-index: 1000;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
 
-// ═══════════════════════════════════════════════════════════════
-// MUDANÇA 4: Sincronização periódica a cada 5 minutos
-// ═══════════════════════════════════════════════════════════════
-setInterval(async () => {
-  if (Notification.permission === 'granted' && navigator.serviceWorker.controller) {
-    navigator.serviceWorker.controller.postMessage({ 
-      tipo: 'AGENDAMENTOS', 
-      agendas 
-    });
-    console.log('[APP] 🔄 Sincronização periódica (5 min)');
-  }
-}, 5 * 60 * 1000);
+        .sidebar.active {
+            transform: translateX(0);
+        }
 
-// Teste rápido: envia uma notificação de teste imediata
-async function testarNotificacao() {
-  if (Notification.permission !== 'granted') {
-    alert('Ative as notificações primeiro.');
-    return;
-  }
-  const reg = await navigator.serviceWorker.ready;
-  reg.showNotification('✂️ Teste — Espaço Gabi Borges', {
-    body: 'Notificações funcionando! Você receberá avisos 1h antes dos agendamentos.',
-    icon: './icon-192.png',
-    tag: 'teste'
-  });
-}
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
 
-</script>
+        .sidebar-header h2 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 20px;
+        }
+
+        .sidebar-close {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .sidebar-nav button {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-nav button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .sidebar-nav button.active {
+            background: #d4af37;
+            color: #1a1a2e;
+            border-color: #d4af37;
+        }
+
+        /* MAIN CONTENT */
+        .main {
+            flex: 1;
+            margin-left: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* HEADER */
+        .header {
+            background: rgba(20, 20, 40, 0.95);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .menu-toggle {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .header h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 24px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .saldo {
+            text-align: right;
+        }
+
+        .saldo-label {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .saldo-valor {
+            font-size: 20px;
+            font-weight: 700;
+            color: #d4af37;
+        }
+
+        /* CONTENT */
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 25px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* CARDS */
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .card-title {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .card-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #d4af37;
+        }
+
+        .card-desc {
+            font-size: 13px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        /* KPI GRID */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .kpi-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .kpi-label {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 10px;
+        }
+
+        .kpi-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #d4af37;
+        }
+
+        /* BUTTONS */
+        button {
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .btn {
+            background: #d4af37;
+            color: #1a1a2e;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background: #e5c158;
+            transform: translateY(-2px);
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 13px;
+        }
+
+        .btn-danger {
+            background: #ff6b6b;
+        }
+
+        .btn-danger:hover {
+            background: #ff5252;
+        }
+
+        /* FAB BUTTON */
+        .fab {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: #d4af37;
+            color: #1a1a2e;
+            border: none;
+            border-radius: 50%;
+            font-size: 28px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(212, 175, 55, 0.4);
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .fab:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 25px rgba(212, 175, 55, 0.6);
+        }
+
+        /* MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #1a1a2e;
+            border-radius: 12px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-header h2 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 22px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 13px;
+            color: #999;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #fff;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: #666;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .form-buttons button {
+            flex: 1;
+        }
+
+        .btn-cancel {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-cancel:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* DATA PICKER */
+        .date-picker {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
+
+        .date-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+            font-size: 13px;
+        }
+
+        .date-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .date-btn.active {
+            background: #d4af37;
+            color: #1a1a2e;
+            border-color: #d4af37;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+            }
+
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .fab {
+                bottom: 20px;
+                right: 20px;
+                width: 50px;
+                height: 50px;
+                font-size: 24px;
+            }
+
+            .modal-content {
+                width: 95%;
+            }
+        }
+
+        /* OVERLAY */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        .overlay.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay" id="overlay"></div>
+
+    <div class="container">
+        <!-- SIDEBAR -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>✂ Menu</h2>
+                <button class="sidebar-close" onclick="toggleSidebar()">✕</button>
+            </div>
+            <nav class="sidebar-nav">
+                <button class="active" onclick="switchTab('inicio', this)">📊 Início</button>
+                <button onclick="switchTab('financeiro', this)">💰 Financeiro</button>
+                <button onclick="switchTab('agenda', this)">📅 Agenda</button>
+                <button onclick="switchTab('config', this)">⚙ Config</button>
+            </nav>
+        </div>
+
+        <!-- MAIN -->
+        <div class="main">
+            <!-- HEADER -->
+            <div class="header">
+                <div class="header-left">
+                    <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+                    <h1>✂ Espaço Gabi Borges</h1>
+                </div>
+                <div class="header-right">
+                    <div class="saldo">
+                        <div class="saldo-label">Saldo Total</div>
+                        <div class="saldo-valor" id="saldoTotal">R$ 0,00</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONTENT -->
+            <div class="content">
+                <!-- INÍCIO -->
+                <div class="tab-content active" id="inicio">
+                    <h2 style="margin-bottom: 20px; font-family: 'DM Serif Display', serif; font-size: 28px;">Bem-vinda, Gabi! 👋</h2>
+                    
+                    <div class="kpi-grid">
+                        <div class="kpi-card">
+                            <div class="kpi-label">Receita (Hoje)</div>
+                            <div class="kpi-value" id="receitaHoje">R$ 0,00</div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-label">Despesa (Hoje)</div>
+                            <div class="kpi-value" id="despesaHoje">R$ 0,00</div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-label">Lucro (Hoje)</div>
+                            <div class="kpi-value" id="lucroHoje">R$ 0,00</div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-label">Agendamentos</div>
+                            <div class="kpi-value" id="agendamentosHoje">0</div>
+                        </div>
+                    </div>
+
+                    <h3 style="margin-bottom: 15px; margin-top: 30px;">Últimos Lançamentos</h3>
+                    <div id="ultimosLancamentos"></div>
+
+                    <h3 style="margin-bottom: 15px; margin-top: 30px;">Próximos Agendamentos</h3>
+                    <div id="proximosAgendamentos"></div>
+                </div>
+
+                <!-- FINANCEIRO -->
+                <div class="tab-content" id="financeiro">
+                    <h2 style="margin-bottom: 20px; font-family: 'DM Serif Display', serif; font-size: 28px;">Financeiro</h2>
+                    
+                    <div class="kpi-grid">
+                        <div class="kpi-card">
+                            <div class="kpi-label">Receita (Mês)</div>
+                            <div class="kpi-value" id="receitaMes">R$ 0,00</div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-label">Despesa (Mês)</div>
+                            <div class="kpi-value" id="despesaMes">R$ 0,00</div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-label">Lucro (Mês)</div>
+                            <div class="kpi-value" id="lucroMes">R$ 0,00</div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-label">Margem</div>
+                            <div class="kpi-value" id="margem">0%</div>
+                        </div>
+                    </div>
+
+                    <h3 style="margin-bottom: 15px;">Histórico de Transações</h3>
+                    <div id="historico"></div>
+                </div>
+
+                <!-- AGENDA -->
+                <div class="tab-content" id="agenda">
+                    <h2 style="margin-bottom: 20px; font-family: 'DM Serif Display', serif; font-size: 28px;">Agenda</h2>
+                    
+                    <div class="date-picker" id="datePicker"></div>
+                    
+                    <h3 style="margin-bottom: 15px;">Agendamentos do Dia</h3>
+                    <div id="agendamentosDodia"></div>
+
+                    <h3 style="margin-bottom: 15px; margin-top: 30px;">Próximos Agendamentos</h3>
+                    <div id="proximosAgendamentosTab"></div>
+                </div>
+
+                <!-- CONFIG -->
+                <div class="tab-content" id="config">
+                    <h2 style="margin-bottom: 20px; font-family: 'DM Serif Display', serif; font-size: 28px;">Configurações</h2>
+                    
+                    <div class="card">
+                        <h3 style="margin-bottom: 15px;">🔔 Notificações</h3>
+                        <button class="btn" id="notifBtn" onclick="ativarNotifBtn()">🔔 Ativar Avisos</button>
+                        <p style="font-size: 12px; color: #999; margin-top: 10px;">Receba avisos 1 hora antes de cada agendamento</p>
+                    </div>
+
+                    <div class="card">
+                        <h3 style="margin-bottom: 15px;">ℹ Sobre</h3>
+                        <p>Espaço Gabi Borges v1.0</p>
+                        <p style="font-size: 12px; color: #999; margin-top: 10px;">App de gestão financeira e agenda para salão de beleza</p>
+                    </div>
+
+                    <div class="card">
+                        <h3 style="margin-bottom: 15px;">🗑 Dados</h3>
+                        <button class="btn btn-danger" onclick="if(confirm('Tem certeza? Todos os dados serão deletados!')) { localStorage.clear(); location.reload(); }">Limpar Todos os Dados</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAB BUTTON -->
+    <button class="fab" onclick="openNewModal()">+</button>
+
+    <!-- MODAL NOVO LANÇAMENTO -->
+    <div class="modal" id="modalNovoLancamento">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Novo Lançamento</h2>
+                <button class="modal-close" onclick="closeModal('modalNovoLancamento')">✕</button>
+            </div>
+            <form onsubmit="saveLancamento(event)">
+                <div class="form-group">
+                    <label>Tipo</label>
+                    <select id="tipoLancamento" required>
+                        <option value="">Selecione...</option>
+                        <option value="receita">💰 Receita</option>
+                        <option value="despesa">📉 Despesa</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Categoria</label>
+                    <select id="categoriaLancamento" required>
+                        <option value="">Selecione...</option>
+                        <option value="servico">Serviço</option>
+                        <option value="produto">Produto</option>
+                        <option value="aluguel">Aluguel</option>
+                        <option value="salario">Salário</option>
+                        <option value="fornecedor">Fornecedor</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Descrição</label>
+                    <input type="text" id="descricaoLancamento" placeholder="Ex: Corte e Coloração" required>
+                </div>
+                <div class="form-group">
+                    <label>Valor (R$)</label>
+                    <input type="number" id="valorLancamento" placeholder="0,00" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label>Data</label>
+                    <input type="date" id="dataLancamento" required>
+                </div>
+                <div class="form-buttons">
+                    <button type="button" class="btn btn-cancel" onclick="closeModal('modalNovoLancamento')">Cancelar</button>
+                    <button type="submit" class="btn">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL NOVO AGENDAMENTO -->
+    <div class="modal" id="modalNovoAgendamento">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Novo Agendamento</h2>
+                <button class="modal-close" onclick="closeModal('modalNovoAgendamento')">✕</button>
+            </div>
+            <form onsubmit="saveAgendamento(event)">
+                <div class="form-group">
+                    <label>Cliente</label>
+                    <input type="text" id="clienteAgendamento" placeholder="Nome da cliente" required>
+                </div>
+                <div class="form-group">
+                    <label>Serviço</label>
+                    <select id="servicoAgendamento" required>
+                        <option value="">Selecione...</option>
+                        <option value="Corte">Corte</option>
+                        <option value="Coloração">Coloração</option>
+                        <option value="Alisamento">Alisamento</option>
+                        <option value="Hidratação">Hidratação</option>
+                        <option value="Escova">Escova</option>
+                        <option value="Manicure">Manicure</option>
+                        <option value="Pedicure">Pedicure</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Data</label>
+                    <input type="date" id="dataAgendamento" required>
+                </div>
+                <div class="form-group">
+                    <label>Hora</label>
+                    <input type="time" id="horaAgendamento" required>
+                </div>
+                <div class="form-group">
+                    <label>Observações</label>
+                    <textarea id="obsAgendamento" placeholder="Observações adicionais..."></textarea>
+                </div>
+                <div class="form-buttons">
+                    <button type="button" class="btn btn-cancel" onclick="closeModal('modalNovoAgendamento')">Cancelar</button>
+                    <button type="submit" class="btn">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // DADOS
+        let lancamentos = JSON.parse(localStorage.getItem('lancamentos')) || [];
+        let agendamentos = JSON.parse(localStorage.getItem('agendamentos')) || [];
+        let dataSelecionada = new Date().toISOString().split('T')[0];
+
+        // SIDEBAR
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+            document.getElementById('overlay').classList.toggle('active');
+        }
+
+        document.getElementById('overlay').addEventListener('click', toggleSidebar);
+
+        // TABS
+        function switchTab(tab, element) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.getElementById(tab).classList.add('active');
+            
+            document.querySelectorAll('.sidebar-nav button').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+            
+            toggleSidebar();
+            
+            if (tab === 'agenda') renderDatePicker();
+        }
+
+        // MODALS
+        function openNewModal() {
+            document.getElementById('modalNovoLancamento').classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // SALVAR LANÇAMENTO
+        function saveLancamento(e) {
+            e.preventDefault();
+            const lancamento = {
+                id: Date.now(),
+                tipo: document.getElementById('tipoLancamento').value,
+                categoria: document.getElementById('categoriaLancamento').value,
+                descricao: document.getElementById('descricaoLancamento').value,
+                valor: parseFloat(document.getElementById('valorLancamento').value),
+                data: document.getElementById('dataLancamento').value
+            };
+            lancamentos.push(lancamento);
+            localStorage.setItem('lancamentos', JSON.stringify(lancamentos));
+            closeModal('modalNovoLancamento');
+            document.querySelector('#modalNovoLancamento form').reset();
+            renderDashboard();
+        }
+
+        // SALVAR AGENDAMENTO
+        function saveAgendamento(e) {
+            e.preventDefault();
+            const agendamento = {
+                id: Date.now(),
+                cliente: document.getElementById('clienteAgendamento').value,
+                servico: document.getElementById('servicoAgendamento').value,
+                data: document.getElementById('dataAgendamento').value,
+                hora: document.getElementById('horaAgendamento').value,
+                obs: document.getElementById('obsAgendamento').value,
+                status: 'confirmado'
+            };
+            agendamentos.push(agendamento);
+            localStorage.setItem('agendamentos', JSON.stringify(agendamentos));
+            reagendarNotificacoes();
+            closeModal('modalNovoAgendamento');
+            document.querySelector('#modalNovoAgendamento form').reset();
+            renderDashboard();
+        }
+
+        // NOTIFICAÇÕES
+        function ativarNotifBtn() {
+            if ('Notification' in window) {
+                if (Notification.permission === 'granted') {
+                    alert('✅ Notificações já ativadas!');
+                } else if (Notification.permission !== 'denied') {
+                    Notification.requestPermission().then(permission => {
+                        if (permission === 'granted') {
+                            alert('✅ Notificações ativadas!');
+                            if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+                                reagendarNotificacoes();
+                            }
+                        }
+                    });
+                }
+            }
+        }
+
+        function reagendarNotificacoes() {
+            if ('serviceWorker' in navigator && Notification.permission === 'granted') {
+                navigator.serviceWorker.ready.then(registration => {
+                    if (navigator.serviceWorker.controller) {
+                        navigator.serviceWorker.controller.postMessage({
+                            tipo: 'AGENDAMENTOS',
+                            agendas: agendamentos
+                        });
+                        console.log('[APP] ✅ Agendamentos sincronizados com SW');
+                    }
+                }).catch(err => console.error('[APP] ❌ Erro ao sincronizar:', err));
+            }
+        }
+
+        // RENDER DASHBOARD
+        function renderDashboard() {
+            const hoje = new Date().toISOString().split('T')[0];
+            
+            // KPI Hoje
+            const lancHoje = lancamentos.filter(l => l.data === hoje);
+            const receitaHoje = lancHoje.filter(l => l.tipo === 'receita').reduce((a, b) => a + b.valor, 0);
+            const despesaHoje = lancHoje.filter(l => l.tipo === 'despesa').reduce((a, b) => a + b.valor, 0);
+            
+            document.getElementById('receitaHoje').textContent = 'R$ ' + receitaHoje.toFixed(2);
+            document.getElementById('despesaHoje').textContent = 'R$ ' + despesaHoje.toFixed(2);
+            document.getElementById('lucroHoje').textContent = 'R$ ' + (receitaHoje - despesaHoje).toFixed(2);
+            document.getElementById('agendamentosHoje').textContent = agendamentos.filter(a => a.data === hoje).length;
+
+            // KPI Mês
+            const mesAtual = hoje.substring(0, 7);
+            const lancMes = lancamentos.filter(l => l.data.substring(0, 7) === mesAtual);
+            const receitaMes = lancMes.filter(l => l.tipo === 'receita').reduce((a, b) => a + b.valor, 0);
+            const despesaMes = lancMes.filter(l => l.tipo === 'despesa').reduce((a, b) => a + b.valor, 0);
+            
+            document.getElementById('receitaMes').textContent = 'R$ ' + receitaMes.toFixed(2);
+            document.getElementById('despesaMes').textContent = 'R$ ' + despesaMes.toFixed(2);
+            document.getElementById('lucroMes').textContent = 'R$ ' + (receitaMes - despesaMes).toFixed(2);
+            document.getElementById('margem').textContent = receitaMes > 0 ? ((despesaMes / receitaMes) * 100).toFixed(0) + '%' : '0%';
+
+            // Saldo Total
+            const saldoTotal = lancamentos.filter(l => l.tipo === 'receita').reduce((a, b) => a + b.valor, 0) - 
+                              lancamentos.filter(l => l.tipo === 'despesa').reduce((a, b) => a + b.valor, 0);
+            document.getElementById('saldoTotal').textContent = 'R$ ' + saldoTotal.toFixed(2);
+
+            // Últimos Lançamentos
+            document.getElementById('ultimosLancamentos').innerHTML = lancamentos.slice(-5).reverse().map(l => `
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">${l.descricao}</div>
+                        <div class="card-value" style="color: ${l.tipo === 'receita' ? '#4ade80' : '#ff6b6b'}">
+                            ${l.tipo === 'receita' ? '+' : '-'} R$ ${l.valor.toFixed(2)}
+                        </div>
+                    </div>
+                    <div class="card-desc">${l.categoria} • ${new Date(l.data).toLocaleDateString('pt-BR')}</div>
+                </div>
+            `).join('');
+
+            // Próximos Agendamentos
+            document.getElementById('proximosAgendamentos').innerHTML = agendamentos.slice(0, 3).map(a => `
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">${a.cliente}</div>
+                        <div class="card-value">${a.servico}</div>
+                    </div>
+                    <div class="card-desc">${new Date(a.data).toLocaleDateString('pt-BR')} às ${a.hora}</div>
+                </div>
+            `).join('');
+
+            // Agendamentos do dia
+            const agendamentosDodia = agendamentos.filter(a => a.data === dataSelecionada);
+            document.getElementById('agendamentosDodia').innerHTML = agendamentosDodia.length > 0 ? agendamentosDodia.map(a => `
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">${a.cliente}</div>
+                        <div class="card-value">${a.hora}</div>
+                    </div>
+                    <div class="card-desc">${a.servico}${a.obs ? ' • ' + a.obs : ''}</div>
+                </div>
+            `).join('') : '<p style="color: #999;">Nenhum agendamento para este dia</p>';
+
+            // Próximos Agendamentos Tab
+            document.getElementById('proximosAgendamentosTab').innerHTML = agendamentos.slice(0, 5).map(a => `
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">${a.cliente}</div>
+                        <div class="card-value">${a.servico}</div>
+                    </div>
+                    <div class="card-desc">${new Date(a.data).toLocaleDateString('pt-BR')} às ${a.hora}</div>
+                </div>
+            `).join('');
+        }
+
+        // DATE PICKER
+        function renderDatePicker() {
+            const picker = document.getElementById('datePicker');
+            picker.innerHTML = '';
+            
+            for (let i = 0; i < 14; i++) {
+                const data = new Date();
+                data.setDate(data.getDate() + i);
+                const dataStr = data.toISOString().split('T')[0];
+                const count = agendamentos.filter(a => a.data === dataStr).length;
+                
+                const btn = document.createElement('button');
+                btn.className = 'date-btn' + (dataStr === dataSelecionada ? ' active' : '');
+                btn.textContent = data.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit' }) + (count > 0 ? ` (${count})` : '');
+                btn.onclick = () => {
+                    dataSelecionada = dataStr;
+                    renderDatePicker();
+                    renderDashboard();
+                };
+                picker.appendChild(btn);
+            }
+        }
+
+        // ABRIR MODAL AGENDAMENTO NA ABA AGENDA
+        function openAgendamentoModal() {
+            document.getElementById('modalNovoAgendamento').classList.add('active');
+        }
+
+        // SERVICE WORKER
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw-salao.js').then(reg => {
+                console.log('[APP] ✅ Service Worker registrado');
+                if ('periodicSync' in reg) {
+                    reg.periodicSync.register('sync-agendamentos', { minInterval: 15 * 60 * 1000 });
+                    console.log('[APP] ✅ Periodic Sync registrado');
+                }
+            }).catch(err => console.error('[APP] ❌ Erro ao registrar SW:', err));
+
+            // Sincronizar a cada 5 minutos
+            setInterval(() => {
+                if (navigator.serviceWorker.controller) {
+                    navigator.serviceWorker.controller.postMessage({
+                        tipo: 'AGENDAMENTOS',
+                        agendas: agendamentos
+                    });
+                    console.log('[APP] 🔄 Sincronização periódica (5 min)');
+                }
+            }, 5 * 60 * 1000);
+        }
+
+        // INICIALIZAR
+        renderDashboard();
+        renderDatePicker();
+
+        // Data padrão para novo lançamento
+        document.getElementById('dataLancamento').valueAsDate = new Date();
+        document.getElementById('dataAgendamento').valueAsDate = new Date();
+    </script>
 </body>
 </html>
